@@ -1,0 +1,131 @@
+<% title = "ToDo" %>
+<%- include('./partials/header') %>
+
+<body>
+    <div class="bg-primary py-3">
+        <div class="container">
+            <div class="d-flex justify-content-between gap-3 align-items-center">
+                <h1 class="text-white mb-0">ToDo</h1>
+                <a href="/todo/add-todo" class="btn btn-outline-light">Add ToDo</a>
+            </div>
+        </div>
+      </div>
+</div>
+<div>
+        <div class="container py-5 d-flex flex-column gap-3">
+
+
+    <% if (todoList.length>0){
+
+        let i=1;
+
+        todoList = todoList.sort((a, b) => {
+        let da = new Date(a.postedDate),
+        db = new Date(b.postedDate);
+        return db-da ;
+});
+        todoList.map((todo)=>{ %>
+            <div class="bg-light p-4 rounded">
+
+                <div class="d-flex gap-5 justify-content-between align-items-center">
+                
+                    <h4><%= todo.title %>
+                        <a href="/todo/edit-todo/<%= todo._id %>"> <i class="fa fa-edit text-primary" aria-hidden="true"></i> </a>
+                        </h4>
+                    
+                    <label class="switch">
+                        <input type="checkbox" onchange="toggleStatus[<%=i%>]()" autofill="none" <% if(todo.completed){%> checked <%}%> >
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            <p class="mb-0 text-muted">Posted on:<%let x =(todo.postedDate) %> <span class="fw-bold"><%=x.toString().substr(4,20)%></span></p>
+                
+            <p><%= todo.body %></p>
+
+            <% var comp = todo.completed ? "Completed" : "Not Completed" %>
+            <p href="#" class="updateStatus" data-doc="<%= todo._id %>" data-comp="<%= todo.completed %>">
+                <% var btn = comp === "Completed" ? "btn btn-success rounded-pill" : "btn btn-secondary rounded-pill"  %>
+                <div class="d-flex gap-2 flex-wrap" >    
+                <button href="#" class="<%= btn %>">
+                    <%= comp %>
+                </button>
+                <button class="btn btn-outline-danger rounded-pill deleteTodo" data-delete="<%=todo._id%>">
+                    Delete
+                    </button>
+            </div>
+            </p>
+            <p class="mb-0"></p>
+           
+            </div>
+        <%i++ })
+       
+    }else{ %>
+        
+        <p>Todo Not Set</p>
+    <%}%>
+    </div>
+</div>
+
+<%- include('./partials/footer') %>
+
+    <script>
+        const updtStatus = document.getElementsByClassName('updateStatus');
+        const id = (updtStatus[0].dataset.doc);  
+        const limit = updtStatus.length;
+        let endPoint = [];
+        let completedTodo = [];
+        let completeStatus = [];
+        let toggleStatus = [];
+
+        for(let j=1; j<limit+1; j++){
+        endPoint[j] = `/todo/update-todo-status/${(updtStatus[j-1].dataset.doc)}`;
+        completeStatus[j] = (updtStatus[j-1].dataset.comp==="true" ? 1 : 0) ;
+
+        toggleStatus[j] = () => {
+            completedTodo[j] = async() => {
+                const resolve = await fetch(endPoint[j], {
+                    method: "PUT",
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        completed: completeStatus[j]
+                    })
+                })
+                const data = await resolve.json();
+                window.location.href = data.redirect;
+                }
+            completedTodo[j]();
+            }     
+
+        }
+
+        const deleteTodo = document.getElementsByClassName('deleteTodo');
+
+        for(let k=0; k<deleteTodo.length; k++){
+
+            
+
+            console.log(endPoint[k]);
+
+            deleteTodo[k].addEventListener('click', ()=>{
+                endPoint[k] = `/todo/delete-todo/${deleteTodo[k].dataset.delete}`;
+                const deleteThis = async() => {
+                        const resolv2 = await fetch(endPoint[k], {
+                            method: "DELETE"
+                        })
+                        const data = await resolv2.json();
+                        
+                        window.location.href = data.redirect;
+                    }
+
+                if(confirm("Are you sure?")){
+                    deleteThis();
+
+                    
+                }else{
+                    return;
+                }
+            })
+        }
+    </script>
+</body>
+</html>
