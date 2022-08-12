@@ -5,10 +5,11 @@ The target of this project was to understand CRUD operations and REST API.
 Code is available in ToDo branch.
 
 Home Screen: 
-![Home Page](display.png)
+![Edit Page](edit.png)
 
 Add Todo: 
 ![Add Page](new.png)
 
 Edit Todo:
-![Edit Page](edit.png)
+![Home Page](display.png)
+
